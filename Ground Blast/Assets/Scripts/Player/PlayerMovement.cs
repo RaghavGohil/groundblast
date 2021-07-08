@@ -11,7 +11,12 @@ public class PlayerMovement : MonoBehaviour
     float _dist;
     float _recoil;
     float _nextShootTime;
+    public float _reloadTime {get;private set;}
 
+    //Int:
+    int _maxAmmo;
+    public int _clipsRemainingCount{get; private set;}
+    public int _currentAmmoCount{get; private set;}
     
     //Rigidbody2D:
     Rigidbody2D _rb;
@@ -33,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     //GameObjects:
     [SerializeField]
     GameObject _cannon; // Attach cannon in the ins
+    [SerializeField]
+    GameObject _ammoCounter;
 
     //ParticleSystem:
     [SerializeField]
@@ -40,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
 
     //bool:
     bool _canShoot; //Can shoot or not in the current time.
-    public bool _hasShot; //Has clicked or not.
+    public bool _isReloading{get;private set;}
 
     //Raycasts:
     public RaycastHit2D _hit;
@@ -50,14 +57,18 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
 
-        _hasShot = false;
         _canShoot = true;
+        _isReloading = false;
         _point = new Vector3();
         _theta = new float();
         _ground = "ground";
         _rotationDelay = 10f;
         _forceAmount = 100f; //DirectSet
+        _currentAmmoCount = 5;
+        _maxAmmo = 5;
+        _clipsRemainingCount = 5;
         _nextShootTime = 1f;
+        _reloadTime = 2f;
         _dist = 1f;
         _recoil = 30f;
         _rb = GetComponent<Rigidbody2D>();
@@ -65,14 +76,12 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void FixedUpdate()
-    {
-        
-        Shoot();
-        RotateCannon();
-
+    { 
+        RotateCannon(); 
+        ReloadCheck();
     }
 
-    void Update() => ShootCheck();
+    void Update() => CheckAndShoot();
 
     void RotateCannon()
     {
@@ -87,32 +96,35 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    void ShootCheck()
-    {
-
-        if(Input.GetMouseButtonDown(0) && _canShoot)
-        {
-            _hasShot = true; //Has Pulled Trigger
-            StartCoroutine(WaitForNextShoot(_nextShootTime));
-        }
-    }
-
-    void Shoot()
+    void CheckAndShoot()
     {
         
-        _hit = Physics2D.Raycast(_cannon.transform.position, _point , _dist, _layerMask);
-
-        if(_hasShot)
+        if(Input.GetMouseButtonDown(0) && _canShoot)
         {
+
+            _hit = Physics2D.Raycast(_cannon.transform.position, _point , _dist, _layerMask);
+
+            StartCoroutine(WaitForNextShoot(_nextShootTime));
 
             //Apply some force.
             _rb.AddForce(-_point * _forceAmount, ForceMode2D.Force);
             _particleSystem.Play();
+            _currentAmmoCount --;
             ApplyRecoil();
 
         }
 
-        _hasShot = false;
+    }
+
+    void ReloadCheck()
+    {
+
+        if((_currentAmmoCount <= 0 && !_isReloading) && _clipsRemainingCount>=1)
+        {
+
+            StartCoroutine(ReloadCannon(_reloadTime));
+
+        }else if(_clipsRemainingCount <=0 && _currentAmmoCount <=0){_canShoot = false;}
 
     }
 
@@ -137,9 +149,24 @@ public class PlayerMovement : MonoBehaviour
         _canShoot = false;
 
         yield return new WaitForSeconds(t);
+        
+        if(_currentAmmoCount > 0)
+            _canShoot = true;
 
+    }
+
+    IEnumerator ReloadCannon(float t)
+    {
+
+        _canShoot = false;
+        _isReloading = true;
+        yield return new WaitForSeconds(t);
+        //Reload
+        _isReloading = false;
+        _currentAmmoCount = _maxAmmo;
+        _clipsRemainingCount--; //DecreaseClipCount.
         _canShoot = true;
-
+        
     }
     
     #endregion

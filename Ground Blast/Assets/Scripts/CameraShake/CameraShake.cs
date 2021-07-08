@@ -3,12 +3,31 @@ using System.Collections;
 
 public class CameraShake : MonoBehaviour
 {
-    #region public IEnumerator
 
-    public IEnumerator ShakeCamera(float duration , float magnitude)
+    //Vector3:
+    Vector3 _orgPos;
+
+    #region private void
+
+    void Start()
     {
 
-        Vector3 orgPos = transform.position;
+        _orgPos = new Vector3(0f,0f,0f);
+
+    }
+
+    void Update()
+    {
+
+        _orgPos = transform.position;
+        
+    }
+
+    #endregion
+
+    #region public IEnumerator
+    public IEnumerator ShakeCamera(float duration , float magnitude)
+    {
 
         float elapsed = 0.0f;
 
@@ -18,7 +37,7 @@ public class CameraShake : MonoBehaviour
             float x = Random.Range(-1f,1f)*magnitude;
             float y = Random.Range(-1f,1f)*magnitude;
 
-            transform.position = new Vector3(x,y,orgPos.z);
+            transform.position = new Vector3(_orgPos.x + x,_orgPos.y +y,_orgPos.z);
 
             elapsed += Time.deltaTime;
 

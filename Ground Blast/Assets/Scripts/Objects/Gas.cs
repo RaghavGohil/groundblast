@@ -12,6 +12,9 @@ public class Gas : MonoBehaviour
     float _shakeDuration;
     float _shakeMagnitude;
 
+    //Bool:
+    bool _canExplode;
+
     //LayerMask:
     [SerializeField]
     LayerMask _layerMask;
@@ -30,6 +33,7 @@ public class Gas : MonoBehaviour
     void Start()
     {
 
+        _canExplode = true;
         _destroyTime = 1f;
         _highestVelocityLimit = 10f;
         _shakeDuration = 0.1f;
@@ -89,11 +93,10 @@ public class Gas : MonoBehaviour
     {
         if(_player.GetComponent<PlayerMovement>()._hit.transform != null)
         {
-            if(_player.GetComponent<PlayerMovement>()._hit.transform.GetComponent<Gas>() != null && _player.GetComponent<PlayerMovement>()._hasShot)
+            if((_player.GetComponent<PlayerMovement>()._hit.transform.GetComponent<Gas>() != null) && _player.GetComponent<PlayerMovement>()._hit.transform.GetComponent<Gas>()._canExplode)
             {
+                _player.GetComponent<PlayerMovement>()._hit.transform.GetComponent<Gas>()._canExplode = false;
                 StartCoroutine(_player.GetComponent<PlayerMovement>()._hit.transform.GetComponent<Gas>().Explode(_destroyTime));
-                _player.GetComponent<PlayerMovement>().ApplyRecoil();
-                _player.GetComponent<PlayerMovement>()._hasShot = false;
             }
 
         }
@@ -120,6 +123,7 @@ public class Gas : MonoBehaviour
         Disable();
         yield return new WaitForSeconds(t);
         Destroy(gameObject); //AfterExplosion
+        Destroy(this);
 
     }
 
