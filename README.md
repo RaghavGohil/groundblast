@@ -19,3 +19,5 @@ Contact Me:
 Developer's Note:
 
 Use this project only for studying. Publishing this project is strictly prohibited.
+
+[Development Stopped]
