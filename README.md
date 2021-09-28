@@ -1,6 +1,6 @@
 # Ground-Blast-
 
-Ground Blast Prototype By The Low End Studios. [In Development]
+Ground Blast Prototype By The Low End Studios.
 
 ![image](https://user-images.githubusercontent.com/71706645/125380053-3e5d0e80-e3af-11eb-91b7-ca5280c21496.png)
 
